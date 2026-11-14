@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://joant20.github.io/tec-and-gamer-rd/sitemap.xml
