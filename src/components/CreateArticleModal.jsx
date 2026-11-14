@@ -20,23 +20,35 @@ const PRESET_IMAGES = [
   },
 ];
 
+const VALID_ADMIN_PINS = ['2026', 'tecgamer2026', 'joan2026'];
+
 export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [platform, setPlatform] = useState('IA');
   const [category, setCategory] = useState('Inteligencia Artificial');
-  const [author, setAuthor] = useState('');
+  const [author, setAuthor] = useState('Joan Torres');
   const [image, setImage] = useState(PRESET_IMAGES[0].url);
   const [tags, setTags] = useState('');
   const [content, setContent] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [adminPin, setAdminPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!VALID_ADMIN_PINS.includes(adminPin.trim().toLowerCase())) {
+      setPinError('⚠️ PIN de Administrador incorrecto. Usa tu clave de editor para publicar.');
+      return;
+    }
     if (!title.trim() || !excerpt.trim() || !content.trim()) return;
-    onCreate({
+
+    setPinError('');
+    setSubmitting(true);
+    await onCreate({
       title,
       excerpt,
       platform,
@@ -47,6 +59,7 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
       content,
       featured,
     });
+    setSubmitting(false);
     setTitle('');
     setExcerpt('');
     setContent('');
@@ -73,10 +86,29 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
             <h2 className="section-heading">PUBLICAR EN TEC&amp;GAMER RD 🇩🇴</h2>
           </div>
           <p className="create-modal-subtitle">
-            Agrega una noticia sobre Inteligencia Artificial, instituciones de programación en RD, jugadores famosos o videojuegos.
+            ☁️ <strong>Conectado a tu Base de Datos en la Nube (Supabase):</strong> Las noticias que publiques aquí aparecerán al instante para todos los visitantes en internet.
           </p>
 
           <form onSubmit={handleSubmit} className="create-article-form">
+            <div className="form-group">
+              <label>🔐 Clave de Administrador (Solo para ti) *</label>
+              <input
+                type="password"
+                required
+                placeholder="Ingresa tu PIN de administrador..."
+                value={adminPin}
+                onChange={(e) => {
+                  setAdminPin(e.target.value);
+                  setPinError('');
+                }}
+              />
+              {pinError && (
+                <span style={{ color: '#fda4af', fontSize: '0.8rem', fontWeight: 600 }}>
+                  {pinError}
+                </span>
+              )}
+            </div>
+
             <div className="form-group">
               <label>Título de la noticia *</label>
               <input
@@ -191,8 +223,8 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
               <button type="button" className="btn-cancel" onClick={onClose}>
                 Cancelar
               </button>
-              <button type="submit" className="btn-publish">
-                Publicar en Tec&amp;gamer
+              <button type="submit" className="btn-publish" disabled={submitting}>
+                {submitting ? 'Publicando en la nube...' : 'Publicar en Tec&gamer'}
               </button>
             </div>
           </form>

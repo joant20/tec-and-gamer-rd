@@ -16,6 +16,9 @@ export default function ArticleModal({
   useEffect(() => {
     if (article) {
       setComments(newsService.getComments(article.id));
+      newsService.fetchComments(article.id).then((list) => {
+        if (Array.isArray(list)) setComments(list);
+      });
       document.body.style.overflow = 'hidden';
     }
     return () => {
@@ -25,10 +28,10 @@ export default function ArticleModal({
 
   if (!article) return null;
 
-  const handleAddComment = (e) => {
+  const handleAddComment = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-    const updated = newsService.addComment(article.id, commentAuthor, commentText);
+    const updated = await newsService.addComment(article.id, commentAuthor, commentText);
     setComments(updated);
     setCommentText('');
   };

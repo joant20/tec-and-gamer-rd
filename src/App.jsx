@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CATEGORIES, PLATFORMS } from './data/articles';
 import { newsService } from './services/newsService';
 import BreakingTicker from './components/BreakingTicker';
@@ -23,13 +23,21 @@ export default function App() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSeoModalOpen, setIsSeoModalOpen] = useState(false);
 
+  useEffect(() => {
+    newsService.fetchCloudArticles().then((res) => {
+      if (res?.articles?.length > 0) {
+        setArticles(res.articles);
+      }
+    });
+  }, []);
+
   const handleToggleBookmark = (articleId) => {
     const updated = newsService.toggleBookmark(articleId);
     setBookmarks(updated);
   };
 
-  const handleCreateArticle = (newArticleData) => {
-    const updated = newsService.createArticle(newArticleData);
+  const handleCreateArticle = async (newArticleData) => {
+    const updated = await newsService.createArticle(newArticleData);
     setArticles(updated);
   };
 
