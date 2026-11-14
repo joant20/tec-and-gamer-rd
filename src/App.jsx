@@ -9,6 +9,7 @@ import TrendingSidebar from './components/TrendingSidebar';
 import DominicanHubs from './components/DominicanHubs';
 import ArticleModal from './components/ArticleModal';
 import CreateArticleModal from './components/CreateArticleModal';
+import SeoPreviewModal from './components/SeoPreviewModal';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [activeArticle, setActiveArticle] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSeoModalOpen, setIsSeoModalOpen] = useState(false);
 
   const handleToggleBookmark = (articleId) => {
     const updated = newsService.toggleBookmark(articleId);
@@ -103,6 +105,7 @@ export default function App() {
         onToggleBookmarksOnly={() => setShowBookmarksOnly((prev) => !prev)}
         bookmarksCount={bookmarks.length}
         onOpenCreateModal={() => setIsCreateModalOpen(true)}
+        onOpenSeoModal={() => setIsSeoModalOpen(true)}
       />
 
       <main className="main-content">
@@ -234,6 +237,12 @@ export default function App() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreate={handleCreateArticle}
+      />
+
+      <SeoPreviewModal
+        isOpen={isSeoModalOpen}
+        onClose={() => setIsSeoModalOpen(false)}
+        articles={articles}
       />
     </div>
   );

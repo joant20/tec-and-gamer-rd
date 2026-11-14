@@ -10,6 +10,7 @@ export default function Navbar({
   onToggleBookmarksOnly,
   bookmarksCount,
   onOpenCreateModal,
+  onOpenSeoModal,
 }) {
   return (
     <header className="site-header">
@@ -64,6 +65,15 @@ export default function Navbar({
         </div>
 
         <div className="header-actions">
+          <button
+            type="button"
+            className="action-btn seo-preview-btn"
+            onClick={onOpenSeoModal}
+            title="Ver cómo aparece tu página en el buscador de Google"
+          >
+            <span>🔍 Vista en Google</span>
+          </button>
+
           <button
             type="button"
             className={`action-btn bookmark-filter-btn ${showBookmarksOnly ? 'active' : ''}`}
