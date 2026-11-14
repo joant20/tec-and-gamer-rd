@@ -4,6 +4,7 @@ const STORAGE_KEYS = {
   ARTICLES: 'tecgamer_rd_articles_v2',
   BOOKMARKS: 'tecgamer_rd_bookmarks_v2',
   COMMENTS: 'tecgamer_rd_comments_v2',
+  SUBSCRIBERS: 'tecgamer_rd_subscribers_v1',
   SUPABASE_CONFIG: 'tecgamer_rd_supabase_config_v1',
 };
 
@@ -12,6 +13,12 @@ const DEFAULT_SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://eyfuuuowtkxozpfjvdki.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY =
   import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_b4iHjDeqd2RplWFuVW2eYg_f1ofq69w';
+
+export const VALID_ADMIN_PINS = ['2026', 'tecgamer2026', 'joan2026'];
+
+export function isValidAdminPin(pin) {
+  return VALID_ADMIN_PINS.includes((pin || '').trim().toLowerCase());
+}
 
 function mapRowToArticle(row) {
   return {
@@ -122,7 +129,6 @@ export const newsService = {
 
       const rows = await res.json();
 
-      // Si la tabla en Supabase está recién creada y vacía, subimos automáticamente las 8 noticias iniciales
       if (Array.isArray(rows) && rows.length === 0) {
         const seedPayload = INITIAL_ARTICLES.map(mapArticleToRow);
         const seedRes = await fetch(`${creds.url}/rest/v1/articles`, {
@@ -169,13 +175,20 @@ export const newsService = {
       image:
         newArticleData.image?.trim() ||
         'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=1200&q=80',
-      tags: newArticleData.tags
-        ? newArticleData.tags.split(',').map((t) => t.trim()).filter(Boolean)
-        : ['Tec&gamer', 'República Dominicana'],
-      content: newArticleData.content
-        .split('\n')
-        .map((p) => p.trim())
-        .filter(Boolean),
+      tags:
+        typeof newArticleData.tags === 'string'
+          ? newArticleData.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : newArticleData.tags || ['Tec&gamer', 'República Dominicana'],
+      content:
+        typeof newArticleData.content === 'string'
+          ? newArticleData.content
+              .split('\n')
+              .map((p) => p.trim())
+              .filter(Boolean)
+          : newArticleData.content,
     };
 
     const creds = this.getSupabaseCredentials();
@@ -216,6 +229,66 @@ export const newsService = {
       console.error('Error guardando noticia:', e);
     }
     return updated;
+  },
+
+  async updateArticle(articleId, updatedData) {
+    const current = this.getArticles();
+    const existing = current.find((a) => a.id === articleId) || {};
+
+    const updatedArticle = {
+      ...existing,
+      id: articleId,
+      title: updatedData.title.trim(),
+      excerpt: updatedData.excerpt.trim(),
+      category: updatedData.category || existing.category || 'Videojuegos',
+      platform: updatedData.platform || existing.platform || 'GAMING',
+      author: updatedData.author?.trim() || existing.author || 'Joan Torres',
+      image: updatedData.image?.trim() || existing.image,
+      featured: updatedData.featured ? 'main' : existing.featured === 'main' ? null : existing.featured,
+      tags:
+        typeof updatedData.tags === 'string'
+          ? updatedData.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : updatedData.tags || existing.tags || [],
+      content:
+        typeof updatedData.content === 'string'
+          ? updatedData.content
+              .split('\n')
+              .map((p) => p.trim())
+              .filter(Boolean)
+          : updatedData.content || existing.content || [],
+    };
+
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        if (updatedArticle.featured === 'main') {
+          await fetch(`${creds.url}/rest/v1/articles?featured=eq.main`, {
+            method: 'PATCH',
+            headers: this.getHeaders(creds),
+            body: JSON.stringify({ featured: 'secondary' }),
+          });
+        }
+        await fetch(
+          `${creds.url}/rest/v1/articles?id=eq.${encodeURIComponent(articleId)}`,
+          {
+            method: 'PATCH',
+            headers: this.getHeaders(creds),
+            body: JSON.stringify(mapArticleToRow(updatedArticle)),
+          }
+        );
+        const refreshed = await this.fetchCloudArticles();
+        return { articles: refreshed.articles, updatedArticle };
+      } catch (e) {
+        console.error('Error actualizando noticia en Supabase:', e);
+      }
+    }
+
+    const updatedList = current.map((a) => (a.id === articleId ? updatedArticle : a));
+    localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(updatedList));
+    return { articles: updatedList, updatedArticle };
   },
 
   async deleteArticle(articleId) {
@@ -338,5 +411,47 @@ export const newsService = {
     } catch {
       return [];
     }
+  },
+
+  async subscribeNewsletter(email) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return false;
+
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        // Guardamos el suscriptor directamente en la nube en Supabase (tabla comments con identificador __newsletter_subscriber__)
+        const record = {
+          id: `sub-${Date.now()}`,
+          article_id: '__newsletter_subscriber__',
+          author: 'Suscriptor Radar Semanal',
+          time: new Date().toLocaleDateString('es-DO', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }),
+          text: cleanEmail,
+        };
+        await fetch(`${creds.url}/rest/v1/comments`, {
+          method: 'POST',
+          headers: this.getHeaders(creds),
+          body: JSON.stringify(record),
+        });
+      } catch (e) {
+        console.error('Error guardando suscriptor en Supabase:', e);
+      }
+    }
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SUBSCRIBERS);
+      const list = saved ? JSON.parse(saved) : [];
+      if (!list.includes(cleanEmail)) {
+        list.push(cleanEmail);
+        localStorage.setItem(STORAGE_KEYS.SUBSCRIBERS, JSON.stringify(list));
+      }
+    } catch {
+      // ignore
+    }
+    return true;
   },
 };

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CATEGORIES } from '../data/articles';
+import { isValidAdminPin } from '../services/newsService';
 
 const PRESET_IMAGES = [
   {
@@ -20,9 +21,13 @@ const PRESET_IMAGES = [
   },
 ];
 
-const VALID_ADMIN_PINS = ['2026', 'tecgamer2026', 'joan2026'];
-
-export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
+export default function CreateArticleModal({
+  isOpen,
+  onClose,
+  onCreate,
+  onUpdate,
+  editingArticle,
+}) {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [platform, setPlatform] = useState('IA');
@@ -36,19 +41,51 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
   const [pinError, setPinError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (editingArticle) {
+      setTitle(editingArticle.title || '');
+      setExcerpt(editingArticle.excerpt || '');
+      setPlatform(editingArticle.platform || 'IA');
+      setCategory(editingArticle.category || 'Inteligencia Artificial');
+      setAuthor(editingArticle.author || 'Joan Torres');
+      setImage(editingArticle.image || PRESET_IMAGES[0].url);
+      setTags(Array.isArray(editingArticle.tags) ? editingArticle.tags.join(', ') : '');
+      setContent(
+        Array.isArray(editingArticle.content)
+          ? editingArticle.content.join('\n\n')
+          : editingArticle.content || ''
+      );
+      setFeatured(editingArticle.featured === 'main');
+    } else {
+      setTitle('');
+      setExcerpt('');
+      setPlatform('IA');
+      setCategory('Inteligencia Artificial');
+      setAuthor('Joan Torres');
+      setImage(PRESET_IMAGES[0].url);
+      setTags('');
+      setContent('');
+      setFeatured(false);
+    }
+    setPinError('');
+  }, [editingArticle, isOpen]);
+
   if (!isOpen) return null;
+
+  const isEditMode = Boolean(editingArticle);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!VALID_ADMIN_PINS.includes(adminPin.trim().toLowerCase())) {
-      setPinError('⚠️ PIN de Administrador incorrecto. Usa tu clave de editor para publicar.');
+    if (!isValidAdminPin(adminPin)) {
+      setPinError('⚠️ PIN de Administrador incorrecto. Usa tu clave de editor para guardar.');
       return;
     }
     if (!title.trim() || !excerpt.trim() || !content.trim()) return;
 
     setPinError('');
     setSubmitting(true);
-    await onCreate({
+
+    const payload = {
       title,
       excerpt,
       platform,
@@ -58,13 +95,15 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
       tags,
       content,
       featured,
-    });
+    };
+
+    if (isEditMode) {
+      await onUpdate?.(editingArticle.id, payload);
+    } else {
+      await onCreate?.(payload);
+    }
+
     setSubmitting(false);
-    setTitle('');
-    setExcerpt('');
-    setContent('');
-    setTags('');
-    setFeatured(false);
     onClose();
   };
 
@@ -83,10 +122,15 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
         <div className="modal-body">
           <div className="section-title-group" style={{ marginBottom: '0.5rem' }}>
             <span className="neon-bar" />
-            <h2 className="section-heading">PUBLICAR EN TEC&amp;GAMER RD 🇩🇴</h2>
+            <h2 className="section-heading">
+              {isEditMode ? '✏️ EDITAR NOTICIA EN TEC&GAMER RD' : 'PUBLICAR EN TEC&GAMER RD 🇩🇴'}
+            </h2>
           </div>
           <p className="create-modal-subtitle">
-            ☁️ <strong>Conectado a tu Base de Datos en la Nube (Supabase):</strong> Las noticias que publiques aquí aparecerán al instante para todos los visitantes en internet.
+            ☁️ <strong>Conectado a tu Base de Datos en la Nube (Supabase):</strong>{' '}
+            {isEditMode
+              ? 'Los cambios se actualizarán al instante para todos los lectores.'
+              : 'Las noticias que publiques aquí aparecerán al instante para todos los visitantes en internet.'}
           </p>
 
           <form onSubmit={handleSubmit} className="create-article-form">
@@ -224,7 +268,11 @@ export default function CreateArticleModal({ isOpen, onClose, onCreate }) {
                 Cancelar
               </button>
               <button type="submit" className="btn-publish" disabled={submitting}>
-                {submitting ? 'Publicando en la nube...' : 'Publicar en Tec&gamer'}
+                {submitting
+                  ? 'Guardando en la nube...'
+                  : isEditMode
+                  ? 'Guardar Cambios'
+                  : 'Publicar en Tec&gamer'}
               </button>
             </div>
           </form>

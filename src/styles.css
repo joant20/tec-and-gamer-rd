@@ -2087,3 +2087,74 @@ body {
   flex-direction: column;
   gap: 0.3rem;
 }
+
+/* ==========================================
+   EDITOR ACTIONS & DELETE CONFIRMATION
+   ========================================== */
+.modal-action-btn.delete-btn:hover {
+  border-color: #f43f5e;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.delete-confirm-box {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.delete-confirm-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.86rem;
+  color: #fecdd3;
+}
+
+.delete-confirm-header span {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.delete-confirm-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.delete-confirm-controls input {
+  flex: 1;
+  min-width: 180px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.btn-confirm-delete {
+  background: #e11d48;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.btn-confirm-delete:hover {
+  background: #be123c;
+}
+
+.delete-error-msg {
+  color: #fda4af;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}

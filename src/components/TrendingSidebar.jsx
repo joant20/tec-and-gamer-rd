@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UPCOMING_RELEASES } from '../data/articles';
+import { newsService } from '../services/newsService';
 
 export default function TrendingSidebar({ articles, onSelectArticle, onSelectPlatform }) {
   const [email, setEmail] = useState('');
@@ -7,9 +8,10 @@ export default function TrendingSidebar({ articles, onSelectArticle, onSelectPla
 
   const topArticles = articles.slice(0, 5);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
+    await newsService.subscribeNewsletter(email);
     setSubscribed(true);
     setEmail('');
   };

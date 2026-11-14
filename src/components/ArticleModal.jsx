@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { newsService } from '../services/newsService';
+import { newsService, isValidAdminPin } from '../services/newsService';
 
 export default function ArticleModal({
   article,
@@ -7,14 +7,23 @@ export default function ArticleModal({
   isBookmarked,
   onToggleBookmark,
   onSelectTag,
+  onEditArticle,
+  onDeleteArticle,
 }) {
   const [comments, setComments] = useState([]);
   const [commentAuthor, setCommentAuthor] = useState('');
   const [commentText, setCommentText] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePin, setDeletePin] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (article) {
+      setShowDeleteConfirm(false);
+      setDeletePin('');
+      setDeleteError('');
       setComments(newsService.getComments(article.id));
       newsService.fetchComments(article.id).then((list) => {
         if (Array.isArray(list)) setComments(list);
@@ -37,9 +46,24 @@ export default function ArticleModal({
   };
 
   const handleCopyShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
+    const shareUrl = `${window.location.origin}${window.location.pathname}?noticia=${encodeURIComponent(
+      article.id
+    )}`;
+    navigator.clipboard?.writeText(shareUrl);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2800);
+  };
+
+  const handleConfirmDelete = async (e) => {
+    e.preventDefault();
+    if (!isValidAdminPin(deletePin)) {
+      setDeleteError('⚠️ Clave de Administrador incorrecta.');
+      return;
+    }
+    setDeleting(true);
+    await onDeleteArticle?.(article.id);
+    setDeleting(false);
+    onClose();
   };
 
   return (
@@ -80,7 +104,7 @@ export default function ArticleModal({
               <div>
                 <div className="modal-author-name">{article.author}</div>
                 <div className="modal-author-role">
-                  {article.authorRole || 'Redacción Nexus'} • {article.publishedAt} •{' '}
+                  {article.authorRole || 'Redacción Tec&gamer RD'} • {article.publishedAt} •{' '}
                   {article.readTime}
                 </div>
               </div>
@@ -95,10 +119,58 @@ export default function ArticleModal({
                 {isBookmarked ? '★ Guardada' : '☆ Guardar'}
               </button>
               <button type="button" className="modal-action-btn" onClick={handleCopyShare}>
-                {copied ? '✓ Enlace copiado' : '🔗 Compartir'}
+                {copied ? '✓ Link directo copiado' : '🔗 Compartir Noticia'}
+              </button>
+              <button
+                type="button"
+                className="modal-action-btn"
+                onClick={() => onEditArticle?.(article)}
+                title="Editar noticia (Requiere clave de Admin)"
+              >
+                ✏️ Editar
+              </button>
+              <button
+                type="button"
+                className="modal-action-btn delete-btn"
+                onClick={() => setShowDeleteConfirm((prev) => !prev)}
+                title="Eliminar noticia (Requiere clave de Admin)"
+              >
+                🗑️ Borrar
               </button>
             </div>
           </div>
+
+          {showDeleteConfirm && (
+            <form className="delete-confirm-box" onSubmit={handleConfirmDelete}>
+              <div className="delete-confirm-header">
+                <strong>🔐 Eliminar esta noticia de la base de datos:</strong>
+                <span>Ingresa tu clave de Administrador para confirmar</span>
+              </div>
+              <div className="delete-confirm-controls">
+                <input
+                  type="password"
+                  required
+                  placeholder="Tu clave de Admin..."
+                  value={deletePin}
+                  onChange={(e) => {
+                    setDeletePin(e.target.value);
+                    setDeleteError('');
+                  }}
+                />
+                <button type="submit" className="btn-confirm-delete" disabled={deleting}>
+                  {deleting ? 'Eliminando...' : 'Confirmar Eliminación'}
+                </button>
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+              {deleteError && <div className="delete-error-msg">{deleteError}</div>}
+            </form>
+          )}
 
           <div className="modal-article-content">
             {article.content?.map((paragraph, idx) => (

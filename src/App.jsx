@@ -20,13 +20,34 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [activeArticle, setActiveArticle] = useState(null);
+  const [editingArticle, setEditingArticle] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSeoModalOpen, setIsSeoModalOpen] = useState(false);
 
+  const handleOpenArticle = (article) => {
+    setActiveArticle(article);
+    if (article?.id) {
+      const nextUrl = `${window.location.pathname}?noticia=${encodeURIComponent(article.id)}`;
+      window.history.replaceState(null, '', nextUrl);
+    }
+  };
+
+  const handleCloseArticle = () => {
+    setActiveArticle(null);
+    window.history.replaceState(null, '', window.location.pathname);
+  };
+
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialArticleId = params.get('noticia');
+
     newsService.fetchCloudArticles().then((res) => {
-      if (res?.articles?.length > 0) {
-        setArticles(res.articles);
+      const loaded = res?.articles?.length > 0 ? res.articles : newsService.getArticles();
+      setArticles(loaded);
+
+      if (initialArticleId) {
+        const found = loaded.find((a) => a.id === initialArticleId);
+        if (found) setActiveArticle(found);
       }
     });
   }, []);
@@ -39,6 +60,23 @@ export default function App() {
   const handleCreateArticle = async (newArticleData) => {
     const updated = await newsService.createArticle(newArticleData);
     setArticles(updated);
+  };
+
+  const handleUpdateArticle = async (articleId, updatedData) => {
+    const res = await newsService.updateArticle(articleId, updatedData);
+    if (res?.articles) {
+      setArticles(res.articles);
+    }
+    if (res?.updatedArticle) {
+      setActiveArticle(res.updatedArticle);
+    }
+    setEditingArticle(null);
+  };
+
+  const handleDeleteArticle = async (articleId) => {
+    const updated = await newsService.deleteArticle(articleId);
+    setArticles(updated);
+    handleCloseArticle();
   };
 
   const isDefaultHomeView =
@@ -112,7 +150,10 @@ export default function App() {
         showBookmarksOnly={showBookmarksOnly}
         onToggleBookmarksOnly={() => setShowBookmarksOnly((prev) => !prev)}
         bookmarksCount={bookmarks.length}
-        onOpenCreateModal={() => setIsCreateModalOpen(true)}
+        onOpenCreateModal={() => {
+          setEditingArticle(null);
+          setIsCreateModalOpen(true);
+        }}
         onOpenSeoModal={() => setIsSeoModalOpen(true)}
       />
 
@@ -121,7 +162,7 @@ export default function App() {
           <HeroSection
             mainArticle={mainHeroArticle}
             secondaryArticles={secondaryHeroArticles}
-            onSelectArticle={setActiveArticle}
+            onSelectArticle={handleOpenArticle}
             bookmarks={bookmarks}
             onToggleBookmark={handleToggleBookmark}
           />
@@ -189,7 +230,7 @@ export default function App() {
                   <NewsCard
                     key={article.id}
                     article={article}
-                    onSelect={setActiveArticle}
+                    onSelect={handleOpenArticle}
                     isBookmarked={bookmarks.includes(article.id)}
                     onToggleBookmark={handleToggleBookmark}
                   />
@@ -200,7 +241,7 @@ export default function App() {
 
           <TrendingSidebar
             articles={articles}
-            onSelectArticle={setActiveArticle}
+            onSelectArticle={handleOpenArticle}
             onSelectPlatform={setSelectedPlatform}
           />
         </section>
@@ -232,19 +273,29 @@ export default function App() {
 
       <ArticleModal
         article={activeArticle}
-        onClose={() => setActiveArticle(null)}
+        onClose={handleCloseArticle}
         isBookmarked={activeArticle ? bookmarks.includes(activeArticle.id) : false}
         onToggleBookmark={handleToggleBookmark}
         onSelectTag={(tag) => {
           setSearchQuery(tag);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onEditArticle={(art) => {
+          setEditingArticle(art);
+          setIsCreateModalOpen(true);
+        }}
+        onDeleteArticle={handleDeleteArticle}
       />
 
       <CreateArticleModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setEditingArticle(null);
+        }}
         onCreate={handleCreateArticle}
+        onUpdate={handleUpdateArticle}
+        editingArticle={editingArticle}
       />
 
       <SeoPreviewModal
