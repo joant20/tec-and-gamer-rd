@@ -12,12 +12,14 @@ import ArticleModal from './components/ArticleModal';
 import CreateArticleModal from './components/CreateArticleModal';
 import SeoPreviewModal from './components/SeoPreviewModal';
 import AdminLoginModal from './components/AdminLoginModal';
+import AdminDashboardModal from './components/AdminDashboardModal';
 import Footer from './components/Footer';
 
 const ADMIN_SESSION_KEY = 'tecgamer_rd_admin_session_v1';
 
 export default function App() {
   const [articles, setArticles] = useState(() => newsService.getArticles());
+  const [siteConfig, setSiteConfig] = useState(() => newsService.getLocalSiteConfig());
   const [bookmarks, setBookmarks] = useState(() => newsService.getBookmarks());
   const [selectedPlatform, setSelectedPlatform] = useState('ALL');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
@@ -28,6 +30,7 @@ export default function App() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSeoModalOpen, setIsSeoModalOpen] = useState(false);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(() => {
     try {
       return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
@@ -38,6 +41,7 @@ export default function App() {
 
   const handleLoginAdmin = () => {
     setIsAdmin(true);
+    setIsAdminDashboardOpen(true);
     try {
       sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
     } catch {
@@ -47,6 +51,7 @@ export default function App() {
 
   const handleLogoutAdmin = () => {
     setIsAdmin(false);
+    setIsAdminDashboardOpen(false);
     setIsCreateModalOpen(false);
     setIsSeoModalOpen(false);
     setEditingArticle(null);
@@ -62,6 +67,12 @@ export default function App() {
     if (article?.id) {
       const nextUrl = `${window.location.pathname}?noticia=${encodeURIComponent(article.id)}`;
       window.history.replaceState(null, '', nextUrl);
+
+      newsService.incrementArticleViews(article).then((updatedList) => {
+        if (Array.isArray(updatedList)) {
+          setArticles(updatedList);
+        }
+      });
     }
   };
 
@@ -86,6 +97,10 @@ export default function App() {
         if (found) setActiveArticle(found);
       }
     });
+
+    newsService.fetchSiteConfig().then((cfg) => {
+      if (cfg) setSiteConfig(cfg);
+    });
   }, []);
 
   const handleToggleBookmark = (articleId) => {
@@ -103,7 +118,7 @@ export default function App() {
     if (res?.articles) {
       setArticles(res.articles);
     }
-    if (res?.updatedArticle) {
+    if (res?.updatedArticle && activeArticle?.id === articleId) {
       setActiveArticle(res.updatedArticle);
     }
     setEditingArticle(null);
@@ -112,7 +127,21 @@ export default function App() {
   const handleDeleteArticle = async (articleId) => {
     const updated = await newsService.deleteArticle(articleId);
     setArticles(updated);
-    handleCloseArticle();
+    if (activeArticle?.id === articleId) {
+      handleCloseArticle();
+    }
+  };
+
+  const handleSetMainHero = async (articleId) => {
+    const updated = await newsService.setMainFeaturedArticle(articleId);
+    if (Array.isArray(updated)) {
+      setArticles(updated);
+    }
+  };
+
+  const handleSaveSiteConfig = async (newConfig) => {
+    const saved = await newsService.saveSiteConfig(newConfig);
+    setSiteConfig(saved);
   };
 
   const isDefaultHomeView =
@@ -176,7 +205,7 @@ export default function App() {
 
   return (
     <div id="top" className="app-shell">
-      <BreakingTicker />
+      <BreakingTicker headlines={siteConfig.breakingHeadlines} />
 
       <Navbar
         selectedPlatform={selectedPlatform}
@@ -187,6 +216,7 @@ export default function App() {
         onToggleBookmarksOnly={() => setShowBookmarksOnly((prev) => !prev)}
         bookmarksCount={bookmarks.length}
         isAdmin={isAdmin}
+        onOpenAdminDashboard={() => setIsAdminDashboardOpen(true)}
         onOpenCreateModal={() => {
           setEditingArticle(null);
           setIsCreateModalOpen(true);
@@ -207,6 +237,7 @@ export default function App() {
             />
 
             <VideoGallery
+              videos={siteConfig.featuredVideos}
               articles={articles}
               onSelectArticle={handleOpenArticle}
             />
@@ -263,7 +294,7 @@ export default function App() {
                 <div className="empty-icon">🇩🇴</div>
                 <h3>No encontramos noticias con esos filtros</h3>
                 <p>
-                  Prueba buscando otro término (ej. GTA VI, IA, ITLA, MenaRD, INTEC) o limpia los filtros activos.
+                  Prueba buscando otro término (ej. GTA VI, Zelda, IA, ITLA, MenaRD, INTEC) o limpia los filtros activos.
                 </p>
                 <button type="button" className="btn-publish" onClick={resetAllFilters}>
                   Ver todas las noticias
@@ -338,6 +369,25 @@ export default function App() {
 
       {isAdmin && (
         <>
+          <AdminDashboardModal
+            isOpen={isAdminDashboardOpen}
+            onClose={() => setIsAdminDashboardOpen(false)}
+            articles={articles}
+            siteConfig={siteConfig}
+            onSaveSiteConfig={handleSaveSiteConfig}
+            onOpenCreateArticle={() => {
+              setEditingArticle(null);
+              setIsCreateModalOpen(true);
+            }}
+            onEditArticle={(art) => {
+              setEditingArticle(art);
+              setIsCreateModalOpen(true);
+            }}
+            onDeleteArticle={handleDeleteArticle}
+            onSetMainHero={handleSetMainHero}
+            onOpenSeoModal={() => setIsSeoModalOpen(true)}
+          />
+
           <CreateArticleModal
             isOpen={isCreateModalOpen}
             onClose={() => {

@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FEATURED_VIDEOS } from '../data/articles';
 
-export default function VideoGallery({ articles, onSelectArticle }) {
-  const [activeVideo, setActiveVideo] = useState(FEATURED_VIDEOS[0]);
+export default function VideoGallery({ videos, articles, onSelectArticle }) {
+  const videoList = videos?.length > 0 ? videos : FEATURED_VIDEOS;
+  const [activeVideo, setActiveVideo] = useState(videoList[0]);
+
+  useEffect(() => {
+    if (videoList.length > 0 && !videoList.some((v) => v.id === activeVideo?.id)) {
+      setActiveVideo(videoList[0]);
+    }
+  }, [videoList, activeVideo]);
+
+  if (!activeVideo) return null;
 
   const handleOpenRelatedArticle = (articleId) => {
     const found = articles?.find((a) => a.id === articleId);
@@ -12,7 +21,11 @@ export default function VideoGallery({ articles, onSelectArticle }) {
   };
 
   return (
-    <section className="video-gallery-section container" id="trailers" aria-label="Tráilers y Videos de Videojuegos">
+    <section
+      className="video-gallery-section container"
+      id="trailers"
+      aria-label="Tráilers y Videos de Videojuegos"
+    >
       <div className="section-header-bar">
         <div className="section-title-group">
           <span className="neon-bar-purple" />
@@ -38,7 +51,7 @@ export default function VideoGallery({ articles, onSelectArticle }) {
 
           <div className="video-main-info">
             <div className="video-main-meta">
-              <span className="badge-hot">{activeVideo.badge}</span>
+              <span className="badge-hot">{activeVideo.badge || '🎬 TRÁILER'}</span>
               <span className="badge-category">{activeVideo.game}</span>
               <span className="video-platform-text">{activeVideo.platform}</span>
             </div>
@@ -49,7 +62,7 @@ export default function VideoGallery({ articles, onSelectArticle }) {
                 className="video-related-article-btn"
                 onClick={() => handleOpenRelatedArticle(activeVideo.articleId)}
               >
-                📰 Leer noticia y requisitos de {activeVideo.game} →
+                📰 Leer noticia y detalles de {activeVideo.game} →
               </button>
             )}
           </div>
@@ -59,11 +72,11 @@ export default function VideoGallery({ articles, onSelectArticle }) {
         <div className="video-playlist">
           <div className="playlist-header">
             <span>▶ Selecciona un tráiler para reproducir</span>
-            <span className="playlist-count">{FEATURED_VIDEOS.length} videos</span>
+            <span className="playlist-count">{videoList.length} videos</span>
           </div>
 
           <div className="playlist-items">
-            {FEATURED_VIDEOS.map((vid) => {
+            {videoList.map((vid) => {
               const isSelected = vid.id === activeVideo.id;
               return (
                 <button
@@ -80,7 +93,7 @@ export default function VideoGallery({ articles, onSelectArticle }) {
                       loading="lazy"
                     />
                     <span className="playlist-play-icon">{isSelected ? '🔊' : '▶'}</span>
-                    <span className="playlist-duration">{vid.duration}</span>
+                    {vid.duration && <span className="playlist-duration">{vid.duration}</span>}
                   </div>
 
                   <div className="playlist-item-info">

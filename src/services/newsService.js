@@ -1,14 +1,18 @@
-import { INITIAL_ARTICLES } from '../data/articles';
+import {
+  INITIAL_ARTICLES,
+  BREAKING_HEADLINES as DEFAULT_HEADLINES,
+  FEATURED_VIDEOS as DEFAULT_VIDEOS,
+} from '../data/articles';
 
 const STORAGE_KEYS = {
   ARTICLES: 'tecgamer_rd_articles_v2',
   BOOKMARKS: 'tecgamer_rd_bookmarks_v2',
   COMMENTS: 'tecgamer_rd_comments_v2',
   SUBSCRIBERS: 'tecgamer_rd_subscribers_v1',
+  SITE_CONFIG: 'tecgamer_rd_site_config_v1',
   SUPABASE_CONFIG: 'tecgamer_rd_supabase_config_v1',
 };
 
-// Configuración oficial en la nube (Supabase - Tec&gamer RD)
 const DEFAULT_SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://eyfuuuowtkxozpfjvdki.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY =
@@ -18,6 +22,28 @@ export const VALID_ADMIN_PINS = ['2026', 'tecgamer2026', 'joan2026'];
 
 export function isValidAdminPin(pin) {
   return VALID_ADMIN_PINS.includes((pin || '').trim().toLowerCase());
+}
+
+export function parseViewsCount(viewsStr) {
+  if (typeof viewsStr === 'number') return viewsStr;
+  if (!viewsStr) return 1500;
+  const clean = String(viewsStr).trim().toUpperCase();
+  if (clean.endsWith('K')) {
+    const num = parseFloat(clean.replace('K', ''));
+    return isNaN(num) ? 1500 : Math.round(num * 1000);
+  }
+  if (clean.endsWith('M')) {
+    const num = parseFloat(clean.replace('M', ''));
+    return isNaN(num) ? 1000000 : Math.round(num * 1000000);
+  }
+  const parsed = parseInt(clean.replace(/[^0-9]/g, ''), 10);
+  return isNaN(parsed) ? 1500 : parsed;
+}
+
+export function formatViewsCount(num) {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return String(num);
 }
 
 function mapRowToArticle(row) {
@@ -153,6 +179,74 @@ export const newsService = {
     }
   },
 
+  async incrementArticleViews(article) {
+    if (!article?.id) return null;
+    const currentNumeric = parseViewsCount(article.views);
+    const nextNumeric = currentNumeric + 1;
+    const nextFormatted =
+      currentNumeric >= 1000
+        ? `${((currentNumeric + 100) / 1000).toFixed(1)}K`
+        : String(nextNumeric);
+
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        await fetch(
+          `${creds.url}/rest/v1/articles?id=eq.${encodeURIComponent(article.id)}`,
+          {
+            method: 'PATCH',
+            headers: this.getHeaders(creds),
+            body: JSON.stringify({ views: nextFormatted }),
+          }
+        );
+      } catch {
+        // ignore network error on view bump
+      }
+    }
+
+    const updatedList = this.getArticles().map((a) =>
+      a.id === article.id ? { ...a, views: nextFormatted } : a
+    );
+    try {
+      localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(updatedList));
+    } catch {
+      // ignore
+    }
+    return updatedList;
+  },
+
+  async setMainFeaturedArticle(articleId) {
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        await fetch(`${creds.url}/rest/v1/articles?featured=eq.main`, {
+          method: 'PATCH',
+          headers: this.getHeaders(creds),
+          body: JSON.stringify({ featured: 'secondary' }),
+        });
+        await fetch(
+          `${creds.url}/rest/v1/articles?id=eq.${encodeURIComponent(articleId)}`,
+          {
+            method: 'PATCH',
+            headers: this.getHeaders(creds),
+            body: JSON.stringify({ featured: 'main' }),
+          }
+        );
+        const refreshed = await this.fetchCloudArticles();
+        return refreshed.articles;
+      } catch (e) {
+        console.error('Error cambiando portada principal:', e);
+      }
+    }
+    const updated = this.getArticles().map((a) => {
+      if (a.id === articleId) return { ...a, featured: 'main' };
+      if (a.featured === 'main') return { ...a, featured: 'secondary' };
+      return a;
+    });
+    localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(updated));
+    return updated;
+  },
+
   async createArticle(newArticleData) {
     const current = this.getArticles();
     const created = {
@@ -244,7 +338,12 @@ export const newsService = {
       platform: updatedData.platform || existing.platform || 'GAMING',
       author: updatedData.author?.trim() || existing.author || 'Joan Torres',
       image: updatedData.image?.trim() || existing.image,
-      featured: updatedData.featured ? 'main' : existing.featured === 'main' ? null : existing.featured,
+      views: updatedData.views || existing.views || '1.5K',
+      featured: updatedData.featured
+        ? 'main'
+        : existing.featured === 'main'
+        ? null
+        : existing.featured,
       tags:
         typeof updatedData.tags === 'string'
           ? updatedData.tags
@@ -311,6 +410,129 @@ export const newsService = {
     const updated = this.getArticles().filter((a) => a.id !== articleId);
     localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(updated));
     return updated;
+  },
+
+  // Configuración dinámica del portal (Titulares En Directo y Sala de Tráilers)
+  getLocalSiteConfig() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SITE_CONFIG);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          breakingHeadlines:
+            parsed.breakingHeadlines?.length > 0 ? parsed.breakingHeadlines : DEFAULT_HEADLINES,
+          featuredVideos:
+            parsed.featuredVideos?.length > 0 ? parsed.featuredVideos : DEFAULT_VIDEOS,
+        };
+      }
+    } catch {
+      // ignore
+    }
+    return {
+      breakingHeadlines: DEFAULT_HEADLINES,
+      featuredVideos: DEFAULT_VIDEOS,
+    };
+  },
+
+  async fetchSiteConfig() {
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        const res = await fetch(
+          `${creds.url}/rest/v1/comments?id=eq.__site_config_v1__&select=*`,
+          { headers: this.getHeaders(creds) }
+        );
+        if (res.ok) {
+          const rows = await res.json();
+          if (rows.length > 0 && rows[0].text) {
+            const parsed = JSON.parse(rows[0].text);
+            const config = {
+              breakingHeadlines:
+                parsed.breakingHeadlines?.length > 0
+                  ? parsed.breakingHeadlines
+                  : DEFAULT_HEADLINES,
+              featuredVideos:
+                parsed.featuredVideos?.length > 0 ? parsed.featuredVideos : DEFAULT_VIDEOS,
+            };
+            localStorage.setItem(STORAGE_KEYS.SITE_CONFIG, JSON.stringify(config));
+            return config;
+          }
+        }
+      } catch {
+        // fallback local
+      }
+    }
+    return this.getLocalSiteConfig();
+  },
+
+  async saveSiteConfig(newConfig) {
+    const cleanConfig = {
+      breakingHeadlines:
+        newConfig.breakingHeadlines?.filter((h) => h.trim()) || DEFAULT_HEADLINES,
+      featuredVideos: newConfig.featuredVideos || DEFAULT_VIDEOS,
+    };
+    localStorage.setItem(STORAGE_KEYS.SITE_CONFIG, JSON.stringify(cleanConfig));
+
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        const payload = {
+          id: '__site_config_v1__',
+          article_id: '__site_config__',
+          author: 'Admin Config',
+          time: new Date().toISOString(),
+          text: JSON.stringify(cleanConfig),
+        };
+        await fetch(`${creds.url}/rest/v1/comments`, {
+          method: 'POST',
+          headers: this.getHeaders(creds, 'resolution=merge-duplicates,return=representation'),
+          body: JSON.stringify(payload),
+        });
+      } catch (e) {
+        console.error('Error guardando configuración del sitio en Supabase:', e);
+      }
+    }
+    return cleanConfig;
+  },
+
+  async fetchAdminActivity() {
+    const creds = this.getSupabaseCredentials();
+    if (!creds) return { comments: [], subscribers: [] };
+    try {
+      const res = await fetch(
+        `${creds.url}/rest/v1/comments?select=*&order=created_at.desc`,
+        { headers: this.getHeaders(creds) }
+      );
+      if (res.ok) {
+        const all = await res.json();
+        const subscribers = all.filter((r) => r.article_id === '__newsletter_subscriber__');
+        const comments = all.filter(
+          (r) =>
+            r.article_id !== '__newsletter_subscriber__' && r.article_id !== '__site_config__'
+        );
+        return { comments, subscribers };
+      }
+    } catch {
+      // ignore
+    }
+    return { comments: [], subscribers: [] };
+  },
+
+  async deleteCommentById(commentId) {
+    const creds = this.getSupabaseCredentials();
+    if (creds) {
+      try {
+        await fetch(
+          `${creds.url}/rest/v1/comments?id=eq.${encodeURIComponent(commentId)}`,
+          {
+            method: 'DELETE',
+            headers: this.getHeaders(creds),
+          }
+        );
+      } catch (e) {
+        console.error('Error borrando comentario:', e);
+      }
+    }
   },
 
   getBookmarks() {
@@ -420,7 +642,6 @@ export const newsService = {
     const creds = this.getSupabaseCredentials();
     if (creds) {
       try {
-        // Guardamos el suscriptor directamente en la nube en Supabase (tabla comments con identificador __newsletter_subscriber__)
         const record = {
           id: `sub-${Date.now()}`,
           article_id: '__newsletter_subscriber__',

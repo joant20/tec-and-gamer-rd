@@ -10,6 +10,7 @@ export default function Navbar({
   onToggleBookmarksOnly,
   bookmarksCount,
   isAdmin,
+  onOpenAdminDashboard,
   onOpenCreateModal,
   onOpenSeoModal,
   onLogoutAdmin,
@@ -83,14 +84,14 @@ export default function Navbar({
               <button
                 type="button"
                 className="action-btn seo-preview-btn"
-                onClick={onOpenSeoModal}
-                title="Herramienta SEO para el Administrador"
+                onClick={onOpenAdminDashboard}
+                title="Abrir Panel de Visualizaciones y Control Total"
               >
-                <span>🔍 SEO Google</span>
+                <span>📊 Panel Admin</span>
               </button>
 
               <button type="button" className="btn-publish" onClick={onOpenCreateModal}>
-                <span>+ Publicar Noticia</span>
+                <span>+ Subir Noticia</span>
               </button>
 
               <button
@@ -99,7 +100,7 @@ export default function Navbar({
                 onClick={onLogoutAdmin}
                 title="Salir del modo Administrador y ver como cliente"
               >
-                <span>🔓 Salir Admin</span>
+                <span>🔓 Salir</span>
               </button>
             </>
           )}
