@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DOMINICAN_PRO_PLAYERS, DOMINICAN_TECH_INSTITUTIONS } from '../data/articles';
 
 export default function DominicanHubs({ onFilterByTag, onSelectSection }) {
+  const [activeVideoPlayer, setActiveVideoPlayer] = useState(null);
+
   return (
     <div className="container dominican-hubs-wrapper">
       {/* SECCIÓN 1: JUGADORES FAMOSOS DE REPÚBLICA DOMINICANA */}
@@ -9,7 +11,14 @@ export default function DominicanHubs({ onFilterByTag, onSelectSection }) {
         <div className="section-header-bar">
           <div className="section-title-group">
             <span className="neon-bar-rd" />
-            <h2 className="section-heading">🇩🇴 ORGULLO DOMINICANO: JUGADORES FAMOSOS & PRO PLAYERS</h2>
+            <div>
+              <h2 className="section-heading">
+                🇩🇴 ORGULLO DOMINICANO: JUGADORES PRO & GAMEPLAY EN TORNEOS
+              </h2>
+              <p className="section-subheading">
+                Conoce los rostros reales de nuestras leyendas de eSports y mira sus partidas oficiales en torneos mundiales
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -20,40 +29,146 @@ export default function DominicanHubs({ onFilterByTag, onSelectSection }) {
           </button>
         </div>
 
-        <div className="players-grid">
-          {DOMINICAN_PRO_PLAYERS.map((player) => (
-            <article key={player.id} className="player-card">
-              <div className="player-card-top">
+        {/* REPRODUCTOR DESTACADO DE PARTIDAS PRO CUANDO SE SELECCIONA UN JUGADOR */}
+        {activeVideoPlayer && (
+          <div className="pro-gameplay-theater" id="pro-gameplay-theater">
+            <div className="pro-gameplay-header">
+              <div className="pro-gameplay-Identity">
                 <img
-                  src={player.avatar}
-                  alt={player.gamertag}
-                  className="player-avatar-img"
-                  loading="lazy"
+                  src={activeVideoPlayer.avatar}
+                  alt={activeVideoPlayer.gamertag}
+                  className="pro-gameplay-mini-avatar"
                 />
-                <span className="player-badge">{player.badge}</span>
-                <div className="player-overlay-info">
-                  <span className="player-game-tag">{player.game}</span>
-                  <h3 className="player-gamertag">{player.gamertag}</h3>
-                  <span className="player-realname">{player.realName}</span>
+                <div>
+                  <span className="pro-gameplay-live-pill">🔴 GAMEPLAY OFICIAL DE TORNEO</span>
+                  <h3 className="pro-gameplay-title">
+                    {activeVideoPlayer.gamertag} ({activeVideoPlayer.realName}) — {activeVideoPlayer.matchTitle}
+                  </h3>
                 </div>
               </div>
+              <button
+                type="button"
+                className="pro-gameplay-close"
+                onClick={() => setActiveVideoPlayer(null)}
+              >
+                ✕ Cerrar video
+              </button>
+            </div>
 
-              <div className="player-card-body">
-                <div className="player-achievement">🏆 {player.achievement}</div>
-                <p className="player-bio">{player.bio}</p>
-                <button
-                  type="button"
-                  className="player-filter-btn"
+            <div className="pro-gameplay-iframe-wrap">
+              <iframe
+                src={`https://www.youtube.com/embed/${activeVideoPlayer.youtubeId}?autoplay=1&rel=0`}
+                title={activeVideoPlayer.matchTitle}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="pro-gameplay-iframe"
+              />
+            </div>
+
+            <div className="pro-gameplay-switcher">
+              <span className="pro-switcher-label">Cambiar partida de jugador:</span>
+              <div className="pro-switcher-buttons">
+                {DOMINICAN_PRO_PLAYERS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`pro-switcher-btn ${
+                      activeVideoPlayer.id === p.id ? 'active' : ''
+                    }`}
+                    onClick={() => setActiveVideoPlayer(p)}
+                  >
+                    <img src={p.avatar} alt={p.gamertag} className="pro-switcher-avatar" />
+                    <span>▶ {p.gamertag}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="players-grid">
+          {DOMINICAN_PRO_PLAYERS.map((player) => {
+            const isPlayingThis = activeVideoPlayer?.id === player.id;
+            return (
+              <article
+                key={player.id}
+                className={`player-card ${isPlayingThis ? 'player-card-active-video' : ''}`}
+              >
+                <div
+                  className="player-card-top"
                   onClick={() => {
-                    onFilterByTag(player.tag);
-                    window.scrollTo({ top: 450, behavior: 'smooth' });
+                    setActiveVideoPlayer(player);
+                    const el = document.getElementById('pro-gameplay-theater');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  title={`Ver video de ${player.gamertag} jugando`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setActiveVideoPlayer(player);
+                    }
                   }}
                 >
-                  Ver noticias sobre {player.gamertag}
-                </button>
-              </div>
-            </article>
-          ))}
+                  <img
+                    src={player.avatar}
+                    alt={`${player.gamertag} (${player.realName})`}
+                    className="player-avatar-img"
+                    loading="lazy"
+                  />
+                  <span className="player-badge">{player.badge}</span>
+                  <span className="player-watch-pill">
+                    ▶ Ver Jugando
+                  </span>
+                  <div className="player-overlay-info">
+                    <span className="player-game-tag">{player.game}</span>
+                    <h3 className="player-gamertag">{player.gamertag}</h3>
+                    <span className="player-realname">{player.realName}</span>
+                  </div>
+                </div>
+
+                <div className="player-card-body">
+                  <div className="player-achievement">🏆 {player.achievement}</div>
+                  <p className="player-bio">{player.bio}</p>
+
+                  {player.matchTitle && (
+                    <div className="player-match-preview-box">
+                      <span className="player-match-label">🎮 Partida destacada:</span>
+                      <span className="player-match-name">{player.matchTitle}</span>
+                    </div>
+                  )}
+
+                  <div className="player-card-actions">
+                    <button
+                      type="button"
+                      className={`player-watch-btn ${isPlayingThis ? 'playing' : ''}`}
+                      onClick={() => {
+                        setActiveVideoPlayer(player);
+                        setTimeout(() => {
+                          const el = document.getElementById('pro-gameplay-theater');
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 80);
+                      }}
+                    >
+                      {isPlayingThis ? '🔴 Reproduciendo Partida...' : `▶ Ver a ${player.gamertag} Jugando`}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="player-filter-btn"
+                      onClick={() => {
+                        onFilterByTag(player.tag);
+                        window.scrollTo({ top: 450, behavior: 'smooth' });
+                      }}
+                    >
+                      📰 Noticias de {player.gamertag}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
