@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { newsService } from '../services/newsService';
+import { getArticleYouTubeId } from '../data/articles';
 
 export default function ArticleModal({
   article,
@@ -33,6 +34,9 @@ export default function ArticleModal({
   }, [article]);
 
   if (!article) return null;
+
+  const youtubeId = getArticleYouTubeId(article);
+  const visibleTags = (article.tags || []).filter((t) => !t.toLowerCase().startsWith('video:'));
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -167,10 +171,28 @@ export default function ArticleModal({
             ))}
           </div>
 
-          {article.tags && article.tags.length > 0 && (
+          {youtubeId && (
+            <div className="modal-video-box">
+              <div className="modal-video-header">
+                <span>🎬 TRÁILER / VIDEO OFICIAL DEL JUEGO</span>
+              </div>
+              <div className="video-iframe-container">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
+                  title={`Video de ${article.title}`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="video-iframe"
+                />
+              </div>
+            </div>
+          )}
+
+          {visibleTags.length > 0 && (
             <div className="modal-tags">
               <span className="tags-label">Temas:</span>
-              {article.tags.map((tag) => (
+              {visibleTags.map((tag) => (
                 <button
                   key={tag}
                   type="button"

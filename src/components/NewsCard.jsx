@@ -1,6 +1,9 @@
 import React from 'react';
+import { getArticleYouTubeId } from '../data/articles';
 
 export default function NewsCard({ article, onSelect, isBookmarked, onToggleBookmark }) {
+  const hasVideo = Boolean(getArticleYouTubeId(article));
+
   return (
     <article className="news-card" onClick={() => onSelect(article)}>
       <div className="news-card-media">
@@ -14,6 +17,7 @@ export default function NewsCard({ article, onSelect, isBookmarked, onToggleBook
           <span className={`badge-platform badge-${article.platform.toLowerCase()}`}>
             {article.platform}
           </span>
+          {hasVideo && <span className="badge-video-chip">▶ Tráiler</span>}
           {article.secondaryPlatforms?.map((sp) => (
             <span key={sp} className="badge-platform-mini">
               {sp}

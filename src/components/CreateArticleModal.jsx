@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CATEGORIES } from '../data/articles';
+import { CATEGORIES, extractYouTubeId } from '../data/articles';
 
 const PRESET_IMAGES = [
   {
@@ -33,6 +33,7 @@ export default function CreateArticleModal({
   const [category, setCategory] = useState('Inteligencia Artificial');
   const [author, setAuthor] = useState('Joan Torres');
   const [image, setImage] = useState(PRESET_IMAGES[0].url);
+  const [videoUrl, setVideoUrl] = useState('');
   const [tags, setTags] = useState('');
   const [content, setContent] = useState('');
   const [featured, setFeatured] = useState(false);
@@ -46,7 +47,18 @@ export default function CreateArticleModal({
       setCategory(editingArticle.category || 'Inteligencia Artificial');
       setAuthor(editingArticle.author || 'Joan Torres');
       setImage(editingArticle.image || PRESET_IMAGES[0].url);
-      setTags(Array.isArray(editingArticle.tags) ? editingArticle.tags.join(', ') : '');
+      const existingVidTag = (editingArticle.tags || []).find((t) =>
+        t.toLowerCase().startsWith('video:')
+      );
+      setVideoUrl(
+        existingVidTag
+          ? `https://www.youtube.com/watch?v=${existingVidTag.slice(6)}`
+          : ''
+      );
+      const cleanTags = (editingArticle.tags || []).filter(
+        (t) => !t.toLowerCase().startsWith('video:')
+      );
+      setTags(cleanTags.join(', '));
       setContent(
         Array.isArray(editingArticle.content)
           ? editingArticle.content.join('\n\n')
@@ -60,6 +72,7 @@ export default function CreateArticleModal({
       setCategory('Inteligencia Artificial');
       setAuthor('Joan Torres');
       setImage(PRESET_IMAGES[0].url);
+      setVideoUrl('');
       setTags('');
       setContent('');
       setFeatured(false);
@@ -76,6 +89,15 @@ export default function CreateArticleModal({
 
     setSubmitting(true);
 
+    const parsedTags = tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const ytId = extractYouTubeId(videoUrl);
+    if (ytId) {
+      parsedTags.push(`video:${ytId}`);
+    }
+
     const payload = {
       title,
       excerpt,
@@ -83,7 +105,7 @@ export default function CreateArticleModal({
       category,
       author,
       image,
-      tags,
+      tags: parsedTags.join(', '),
       content,
       featured,
     };
@@ -191,6 +213,16 @@ export default function CreateArticleModal({
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="form-group">
+              <label>🎬 Link de Video o Tráiler de YouTube (Opcional)</label>
+              <input
+                type="text"
+                placeholder="Ej. https://www.youtube.com/watch?v=QdBZY2fkU-0"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
             </div>
 
             <div className="form-group">

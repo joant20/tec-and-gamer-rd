@@ -4,6 +4,7 @@ import { newsService } from './services/newsService';
 import BreakingTicker from './components/BreakingTicker';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
+import VideoGallery from './components/VideoGallery';
 import NewsCard from './components/NewsCard';
 import TrendingSidebar from './components/TrendingSidebar';
 import DominicanHubs from './components/DominicanHubs';
@@ -196,13 +197,20 @@ export default function App() {
 
       <main className="main-content">
         {isDefaultHomeView && (
-          <HeroSection
-            mainArticle={mainHeroArticle}
-            secondaryArticles={secondaryHeroArticles}
-            onSelectArticle={handleOpenArticle}
-            bookmarks={bookmarks}
-            onToggleBookmark={handleToggleBookmark}
-          />
+          <>
+            <HeroSection
+              mainArticle={mainHeroArticle}
+              secondaryArticles={secondaryHeroArticles}
+              onSelectArticle={handleOpenArticle}
+              bookmarks={bookmarks}
+              onToggleBookmark={handleToggleBookmark}
+            />
+
+            <VideoGallery
+              articles={articles}
+              onSelectArticle={handleOpenArticle}
+            />
+          </>
         )}
 
         <section className="container content-layout">

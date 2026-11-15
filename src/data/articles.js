@@ -163,6 +163,81 @@ export const UPCOMING_RELEASES = [
   },
 ];
 
+export const FEATURED_VIDEOS = [
+  {
+    id: 'vid-gta6',
+    title: 'Grand Theft Auto VI (GTA 6) — Tráiler Oficial #1 (Rockstar Games)',
+    game: 'GTA VI',
+    platform: 'PS5 • Xbox Series X|S',
+    duration: '1:31',
+    youtubeId: 'QdBZY2fkU-0',
+    articleId: 'art-rd-gta6',
+    badge: '🔥 #1 TENDENCIA EN RD',
+  },
+  {
+    id: 'vid-zelda-totk',
+    title: 'The Legend of Zelda: Tears of the Kingdom — Tráiler Oficial (Nintendo)',
+    game: 'The Legend of Zelda',
+    platform: 'Nintendo Switch / Next-Gen 4K',
+    duration: '3:54',
+    youtubeId: 'uHGShqcAHlQ',
+    articleId: 'art-rd-zelda-updates',
+    badge: '🗡️ ÉPICO',
+  },
+  {
+    id: 'vid-zelda-echoes',
+    title: 'The Legend of Zelda: Echoes of Wisdom — Tráiler Oficial en Español',
+    game: 'Zelda: Echoes of Wisdom',
+    platform: 'Nintendo Switch',
+    duration: '2:26',
+    youtubeId: '94RTrH2erPE',
+    articleId: 'art-rd-zelda-updates',
+    badge: '✨ NUEVO',
+  },
+  {
+    id: 'vid-sf6-esports',
+    title: 'Street Fighter 6 — Tráiler Oficial de Lanzamiento & Escena Competitiva',
+    game: 'Street Fighter 6 (eSports RD)',
+    platform: 'PS5 • PC • Xbox Series',
+    duration: '2:12',
+    youtubeId: '1INU3FOJsTw',
+    articleId: 'art-rd-1',
+    badge: '🇩🇴 FGC DOMINICANA',
+  },
+];
+
+export function extractYouTubeId(input) {
+  if (!input || typeof input !== 'string') return null;
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+}
+
+export function getArticleYouTubeId(article) {
+  if (!article) return null;
+  if (article.videoUrl) {
+    const id = extractYouTubeId(article.videoUrl);
+    if (id) return id;
+  }
+  const videoTag = article.tags?.find((t) => t.toLowerCase().startsWith('video:'));
+  if (videoTag) {
+    const raw = videoTag.slice(6).trim();
+    const id = extractYouTubeId(raw);
+    if (id) return id;
+  }
+  if (article.id?.includes('gta6')) return 'QdBZY2fkU-0';
+  if (article.id?.includes('zelda')) return 'uHGShqcAHlQ';
+  if (article.id === 'art-rd-1' || article.id === 'art-rd-7') return '1INU3FOJsTw';
+  const titleLower = (article.title || '').toLowerCase();
+  if (titleLower.includes('gta')) return 'QdBZY2fkU-0';
+  if (titleLower.includes('zelda')) return 'uHGShqcAHlQ';
+  if (titleLower.includes('menard') || titleLower.includes('street fighter')) return '1INU3FOJsTw';
+  return null;
+}
+
 export const INITIAL_ARTICLES = [
   {
     id: 'art-rd-gta6',
