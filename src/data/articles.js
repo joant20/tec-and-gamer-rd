@@ -18,10 +18,10 @@ export const CATEGORIES = [
 ];
 
 export const BREAKING_HEADLINES = [
-  '🇩🇴 ORGULLO DOMINICANO: MenaRD clasifica a la gran final internacional y pone a República Dominicana en la cima de los Fighting Games',
+  '🔥 VIRAL EN RD: GTA VI desata fiebre en República Dominicana con memes de Vice City, reacciones de streamers locales y preventas récord',
+  '🎮 GTA VI EN DETALLE: Nuevo sistema de física e Inteligencia Artificial promete el mundo abierto más realista en la historia del gaming',
   '🤖 INTELIGENCIA ARTIFICIAL: Nuevos agentes de IA aceleran el desarrollo de videojuegos y software en estudios de Santo Domingo y Santiago',
   '🎓 EDUCACIÓN TECH RD: ITLA e INTEC amplían sus programas de Inteligencia Artificial, Desarrollo de Software y Simulación Interactiva',
-  '🏆 BLINK RESPAWN: Santo Domingo se prepara para recibir a más de 1,500 competidores internacionales de eSports en el Caribe',
 ];
 
 export const DOMINICAN_PRO_PLAYERS = [
@@ -165,6 +165,49 @@ export const UPCOMING_RELEASES = [
 
 export const INITIAL_ARTICLES = [
   {
+    id: 'art-rd-gta6',
+    title: 'Fiebre por GTA VI en República Dominicana: Cómo el esperado juego de Rockstar se está viralizando en redes, memes y tiendas del país',
+    excerpt: 'Desde comparaciones virales en TikTok entre Vice City y el Malecón de Santo Domingo hasta récords de reservas de consolas en tiendas locales: así vive la comunidad gamer dominicana el fenómeno de Grand Theft Auto VI.',
+    category: 'Videojuegos',
+    platform: 'GAMING',
+    secondaryPlatforms: ['IA', 'HARDWARE'],
+    author: 'Joan Torres',
+    authorRole: 'Fundador & Editor Jefe Tec&gamer',
+    publishedAt: 'Hace 10 minutos',
+    readTime: '5 min lectura',
+    views: '94.2K',
+    featured: 'main',
+    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=80',
+    tags: ['GTA VI', 'Viral RD', 'Rockstar Games', 'Videojuegos', 'República Dominicana'],
+    content: [
+      'Ningún otro videojuego en la última década ha generado tanto impacto cultural en República Dominicana como Grand Theft Auto VI (GTA 6). En las últimas semanas, las redes sociales dominicanas —especialmente TikTok, Instagram y X— se han inundado de clips, análisis cuadro por cuadro y parodias criollas que suman millones de reproducciones.',
+      'La estética tropical y vibrante de Leonida y Vice City ha conectado de inmediato con el público caribeño. Creadores de contenido, streamers y páginas de humor de Santo Domingo, Santiago y La Vega han viralizado comparaciones entre las escenas de playa, motores y vida nocturna del tráiler con situaciones cotidianas de Boca Chica, el Malecón y las avenidas de la capital, acompañadas de dembow y merengue.',
+      'Más allá de los memes, el impacto comercial en el país es real: tiendas especializadas de tecnología y videojuegos en República Dominicana reportan un aumento histórico en las consultas y preventas de PlayStation 5 Pro y Xbox Series X, ya que miles de jugadores dominicanos están actualizando sus consolas y televisores 4K exclusivamente para estar listos desde el día uno.',
+      'En el apartado técnico, Rockstar Games apuesta por una densidad de peatones gobernada por rutinas avanzadas de Inteligencia Artificial, clima tropical dinámico con huracanes y reflejos por trazado de rayos que prometen marcar un antes y un después en la industria.'
+    ]
+  },
+  {
+    id: 'art-rd-gta6-ia',
+    title: 'GTA VI y su revolución técnica: Así funcionan la Inteligencia Artificial de sus NPCs, las físicas del agua y el tráfico realista',
+    excerpt: 'Analizamos las patentes y avances del motor RAGE 9 que permitirán que cada habitante de Vice City tenga rutinas diarias y reacciones únicas.',
+    category: 'Videojuegos',
+    platform: 'GAMING',
+    secondaryPlatforms: ['IA'],
+    author: 'Carlos Báez',
+    authorRole: 'Analista de IA & Futuro Digital',
+    publishedAt: 'Hace 25 minutos',
+    readTime: '6 min lectura',
+    views: '61.5K',
+    featured: 'secondary',
+    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    tags: ['GTA VI', 'Inteligencia Artificial', 'Rockstar Games', 'Motor RAGE'],
+    content: [
+      'Uno de los secretos mejor guardados detrás del impresionante realismo de GTA VI es la evolución de su motor propietario RAGE, que ahora integra sistemas de navegación y animación procedural asistidos por Inteligencia Artificial.',
+      'A diferencia de entregas anteriores donde los peatones seguían rutas simples, cada NPC cuenta ahora con estados de ánimo, memoria de eventos cercanos y reacciones físicas dinámicas ante cambios en el clima o accidentes de tránsito.',
+      'Además, la simulación de fluidos en tiempo real para las playas y canales de Vice City utiliza cálculos en GPU de última generación, logrando olas, espuma marina y reflejos de neón sobre el asfalto mojado nunca antes vistos en consolas.'
+    ]
+  },
+  {
     id: 'art-rd-1',
     title: 'MenaRD y la élite dominicana de eSports: Cómo República Dominicana se convirtió en una potencia mundial de los videojuegos competitivos',
     excerpt: 'Desde torneos locales en Santo Domingo hasta levantar dos veces la Capcom Cup: repasamos el impacto de Saúl "MenaRD" Mena, Caba, Crossover y el festival Blink Respawn.',
@@ -173,10 +216,10 @@ export const INITIAL_ARTICLES = [
     secondaryPlatforms: ['GAMING'],
     author: 'Joan Torres',
     authorRole: 'Fundador & Editor Jefe Tec&gamer',
-    publishedAt: 'Hace 20 minutos',
+    publishedAt: 'Hace 2 horas',
     readTime: '6 min lectura',
     views: '68.4K',
-    featured: 'main',
+    featured: null,
     image: 'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=1400&q=80',
     tags: ['MenaRD', 'eSports RD', 'Blink Respawn', 'Street Fighter 6', 'República Dominicana'],
     content: [
