@@ -19,8 +19,8 @@ export const CATEGORIES = [
 
 export const BREAKING_HEADLINES = [
   '🔥 VIRAL EN RD: GTA VI desata fiebre en República Dominicana con memes de Vice City, reacciones de streamers locales y preventas récord',
-  '🎮 GTA VI EN DETALLE: Nuevo sistema de física e Inteligencia Artificial promete el mundo abierto más realista en la historia del gaming',
-  '🤖 INTELIGENCIA ARTIFICIAL: Nuevos agentes de IA aceleran el desarrollo de videojuegos y software en estudios de Santo Domingo y Santiago',
+  '🎮 REQUISITOS GTA VI: Confirmado exclusivamente para PS5, PS5 Pro y Xbox Series X|S con más de 150 GB en SSD NVMe',
+  '🗡️ THE LEGEND OF ZELDA: Últimas actualizaciones traen mejoras en 4K, 60 FPS estables y novedades sobre el universo de Hyrule',
   '🎓 EDUCACIÓN TECH RD: ITLA e INTEC amplían sus programas de Inteligencia Artificial, Desarrollo de Software y Simulación Interactiva',
 ];
 
@@ -173,17 +173,61 @@ export const INITIAL_ARTICLES = [
     secondaryPlatforms: ['IA', 'HARDWARE'],
     author: 'Joan Torres',
     authorRole: 'Fundador & Editor Jefe Tec&gamer',
-    publishedAt: 'Hace 10 minutos',
-    readTime: '5 min lectura',
-    views: '94.2K',
+    publishedAt: 'Hace 5 minutos',
+    readTime: '6 min lectura',
+    views: '98.7K',
     featured: 'main',
     image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=80',
-    tags: ['GTA VI', 'Viral RD', 'Rockstar Games', 'Videojuegos', 'República Dominicana'],
+    tags: ['GTA VI', 'Viral RD', 'Requisitos GTA VI', 'PS5 Pro', 'República Dominicana'],
     content: [
       'Ningún otro videojuego en la última década ha generado tanto impacto cultural en República Dominicana como Grand Theft Auto VI (GTA 6). En las últimas semanas, las redes sociales dominicanas —especialmente TikTok, Instagram y X— se han inundado de clips, análisis cuadro por cuadro y parodias criollas que suman millones de reproducciones.',
       'La estética tropical y vibrante de Leonida y Vice City ha conectado de inmediato con el público caribeño. Creadores de contenido, streamers y páginas de humor de Santo Domingo, Santiago y La Vega han viralizado comparaciones entre las escenas de playa, motores y vida nocturna del tráiler con situaciones cotidianas de Boca Chica, el Malecón y las avenidas de la capital, acompañadas de dembow y merengue.',
-      'Más allá de los memes, el impacto comercial en el país es real: tiendas especializadas de tecnología y videojuegos en República Dominicana reportan un aumento histórico en las consultas y preventas de PlayStation 5 Pro y Xbox Series X, ya que miles de jugadores dominicanos están actualizando sus consolas y televisores 4K exclusivamente para estar listos desde el día uno.',
-      'En el apartado técnico, Rockstar Games apuesta por una densidad de peatones gobernada por rutinas avanzadas de Inteligencia Artificial, clima tropical dinámico con huracanes y reflejos por trazado de rayos que prometen marcar un antes y un después en la industria.'
+      'Más allá de los memes, el impacto comercial en el país es real: tiendas especializadas de tecnología y videojuegos en República Dominicana reportan un aumento histórico en las consultas y preventas de PlayStation 5, PlayStation 5 Pro y Xbox Series X, ya que el juego NO saldrá en PS4 ni Xbox One y requiere hardware de nueva generación con almacenamiento SSD ultrarrápido.',
+      'En el apartado técnico, Rockstar Games apuesta por una densidad de peatones gobernada por rutinas avanzadas de Inteligencia Artificial, clima tropical dinámico con huracanes y reflejos por trazado de rayos que exigen al máximo tanto las consolas actuales como las futuras tarjetas gráficas de PC.'
+    ]
+  },
+  {
+    id: 'art-rd-gta6-requisitos',
+    title: 'Consolas y Requisitos para jugar GTA VI: Qué necesitas tener en PS5, Xbox Series X|S y PC para correrlo al máximo',
+    excerpt: 'Guía definitiva de hardware: consolas compatibles de lanzamiento, espacio necesario en SSD, televisores recomendados y especificaciones técnicas para PC.',
+    category: 'Hardware',
+    platform: 'HARDWARE',
+    secondaryPlatforms: ['GAMING'],
+    author: 'Joan Torres',
+    authorRole: 'Fundador & Editor Jefe Tec&gamer',
+    publishedAt: 'Hace 12 minutos',
+    readTime: '5 min lectura',
+    views: '84.3K',
+    featured: 'secondary',
+    image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=1200&q=80',
+    tags: ['GTA VI', 'Requisitos GTA VI', 'PS5', 'Xbox Series X', 'PC Gaming'],
+    content: [
+      'Con la llegada de GTA VI cada vez más cerca, miles de jugadores en República Dominicana se hacen la misma pregunta: ¿Qué consola o computadora necesito para jugarlo sin problemas? Aquí te detallamos todos los requisitos oficiales y técnicos.',
+      '1. CONSOLAS COMPATIBLES (DÍA UNO): GTA VI se lanza exclusivamente para la actual generación: PlayStation 5 (estándar y Digital), PlayStation 5 Pro y Xbox Series X | S. Queda totalmente descartada su salida en PS4 o Xbox One debido a la carga de Inteligencia Artificial y el streaming continuo de texturas del mapa de Leonida.',
+      '2. RENDIMIENTO POR CONSOLA Y ALMACENAMIENTO: En PS5 Pro el juego aprovechará el reescalado con IA (PSSR) para ofrecer 4K con Ray Tracing mejorado y modos de alta fluidez. En todas las consolas deberás reservar entre 150 GB y 180 GB de espacio libre en el disco SSD NVMe interno (no funciona desde discos duros externos USB tradicionales).',
+      '3. REQUISITOS ESTIMADOS EN PC: Para quienes esperan la versión de PC, las especificaciones apuntan a un mínimo de procesador Intel Core i7-10700K o Ryzen 7 3700X, 16 GB de RAM, tarjeta gráfica NVIDIA RTX 3060 (12 GB) o AMD RX 6700 XT y SSD NVMe PCIe 4.0. Para jugarlo en 1440p o 4K Ultra con Ray Tracing, se recomienda un Ryzen 7 7800X3D o Core i7-14700K, 32 GB de RAM DDR5 y una GPU RTX 4070 Super / RTX 4080 o superior.'
+    ]
+  },
+  {
+    id: 'art-rd-zelda-updates',
+    title: 'The Legend of Zelda: Últimas actualizaciones de Tears of the Kingdom, Echoes of Wisdom y mejoras 4K / 60 FPS en nueva generación',
+    excerpt: 'Nintendo despliega nuevos parches de optimización para las aventuras de Link y la princesa Zelda, sumando tiempos de carga instantáneos, mejoras gráficas y novedades del universo Hyrule.',
+    category: 'Videojuegos',
+    platform: 'GAMING',
+    secondaryPlatforms: ['HARDWARE'],
+    author: 'Laura Almonte',
+    authorRole: 'Editora Gaming & Comunidad RD',
+    publishedAt: 'Hace 18 minutos',
+    readTime: '5 min lectura',
+    views: '72.9K',
+    featured: 'secondary',
+    image: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&w=1200&q=80',
+    tags: ['Zelda', 'Nintendo', 'Tears of the Kingdom', 'Echoes of Wisdom', 'Actualización'],
+    content: [
+      'La saga The Legend of Zelda sigue recibiendo soporte clave por parte de Nintendo con actualizaciones que pulen la experiencia tanto en el catálogo actual como en el hardware de nueva generación.',
+      'En su más reciente actualización técnica, The Legend of Zelda: Tears of the Kingdom y The Legend of Zelda: Echoes of Wisdom han recibido optimizaciones importantes en la gestión de memoria y estabilidad de fotogramas. En zonas de alta carga gráfica como el Bosque Kolog o al combinar decenas de artefactos Zonnan con la habilidad Ultramano, la tasa de refresco se mantiene ahora mucho más sólida.',
+      'Además, gracias al parche de mejora para nueva generación de Nintendo, ambos títulos alcanzan los 60 FPS constantes y resolución escalada hasta 4K en modo televisor, reduciendo los tiempos de teletransporte entre las Islas Celestes, la Superficie y el Subsuelo a menos de dos segundos.',
+      'Por último, el productor de la serie, Eiji Aonuma, adelantó que el equipo de desarrollo ya experimenta con nuevas mecánicas de mundo abierto más interactivas para la próxima entrega principal, mientras avanza en paralelo la producción de la esperada película live-action de The Legend of Zelda.'
     ]
   },
   {
@@ -195,10 +239,10 @@ export const INITIAL_ARTICLES = [
     secondaryPlatforms: ['IA'],
     author: 'Carlos Báez',
     authorRole: 'Analista de IA & Futuro Digital',
-    publishedAt: 'Hace 25 minutos',
+    publishedAt: 'Hace 40 minutos',
     readTime: '6 min lectura',
     views: '61.5K',
-    featured: 'secondary',
+    featured: null,
     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
     tags: ['GTA VI', 'Inteligencia Artificial', 'Rockstar Games', 'Motor RAGE'],
     content: [

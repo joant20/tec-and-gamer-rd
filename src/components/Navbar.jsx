@@ -50,7 +50,7 @@ export default function Navbar({
           <input
             type="text"
             className="search-input"
-            placeholder="Buscar GTA VI, IA, MenaRD, ITLA, INTEC, videojuegos..."
+            placeholder="Buscar GTA VI, Zelda, IA, MenaRD, ITLA, INTEC, requisitos..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />

@@ -69,7 +69,7 @@ export default function Footer({
         <div className="footer-col">
           <h4>Talento &amp; Tendencias</h4>
           <ul>
-            {['GTA VI', 'MenaRD', 'Blink Respawn', 'Inteligencia Artificial'].map((item) => (
+            {['GTA VI', 'Zelda', 'MenaRD', 'Blink Respawn', 'Inteligencia Artificial'].map((item) => (
               <li key={item}>
                 <button
                   type="button"
