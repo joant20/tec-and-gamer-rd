@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import { isValidAdminPin } from '../services/newsService';
 
+const VALID_ADMIN_USERS = [
+  'joan',
+  'joant20',
+  'joan torres',
+  'admin',
+  'admin@tecgamer.do',
+  'tecgamer',
+];
+
 export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
+  const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
@@ -9,10 +19,14 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!isValidAdminPin(pin)) {
-      setError('⚠️ Contraseña incorrecta. Acceso exclusivo para el administrador.');
+    const cleanUser = username.trim().toLowerCase();
+    const userOk = !cleanUser || VALID_ADMIN_USERS.includes(cleanUser);
+
+    if (!userOk || !isValidAdminPin(pin)) {
+      setError('⚠️ Usuario o contraseña incorrectos. Acceso exclusivo para el administrador.');
       return;
     }
+    setUsername('');
     setPin('');
     setError('');
     onLoginSuccess();
@@ -23,7 +37,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
     <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal-container"
-        style={{ maxWidth: '420px' }}
+        style={{ maxWidth: '430px' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -38,20 +52,34 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
         <div className="modal-body">
           <div className="section-title-group" style={{ marginBottom: '0.5rem' }}>
             <span className="neon-bar" />
-            <h2 className="section-heading">🔒 ACCESO ADMINISTRADOR</h2>
+            <h2 className="section-heading">🔒 INICIAR SESIÓN ADMIN</h2>
           </div>
           <p className="create-modal-subtitle">
-            Área restringida para la administración de <strong>Tec&amp;gamer RD</strong>.
+            Ingresa con tu cuenta de fundador de <strong>Tec&amp;gamer RD</strong>.
           </p>
 
           <form onSubmit={handleSubmit} className="create-article-form">
             <div className="form-group">
-              <label>Contraseña de Administrador</label>
+              <label>Usuario Administrador</label>
+              <input
+                type="text"
+                required
+                autoFocus
+                placeholder="Ej. joant20"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Contraseña</label>
               <input
                 type="password"
                 required
-                autoFocus
-                placeholder="Ingresa tu clave secreta..."
+                placeholder="Ingresa tu contraseña..."
                 value={pin}
                 onChange={(e) => {
                   setPin(e.target.value);
@@ -70,7 +98,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
                 Cancelar
               </button>
               <button type="submit" className="btn-publish">
-                Entrar como Admin
+                Entrar al Panel Admin
               </button>
             </div>
           </form>
