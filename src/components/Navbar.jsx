@@ -9,8 +9,10 @@ export default function Navbar({
   showBookmarksOnly,
   onToggleBookmarksOnly,
   bookmarksCount,
+  isAdmin,
   onOpenCreateModal,
   onOpenSeoModal,
+  onLogoutAdmin,
 }) {
   return (
     <header className="site-header">
@@ -48,7 +50,7 @@ export default function Navbar({
           <input
             type="text"
             className="search-input"
-            placeholder="Buscar IA, MenaRD, ITLA, INTEC, videojuegos, programación..."
+            placeholder="Buscar GTA VI, IA, MenaRD, ITLA, INTEC, videojuegos..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />
@@ -67,15 +69,6 @@ export default function Navbar({
         <div className="header-actions">
           <button
             type="button"
-            className="action-btn seo-preview-btn"
-            onClick={onOpenSeoModal}
-            title="Ver cómo aparece tu página en el buscador de Google"
-          >
-            <span>🔍 Vista en Google</span>
-          </button>
-
-          <button
-            type="button"
             className={`action-btn bookmark-filter-btn ${showBookmarksOnly ? 'active' : ''}`}
             onClick={onToggleBookmarksOnly}
             title="Ver noticias guardadas"
@@ -84,9 +77,32 @@ export default function Navbar({
             {bookmarksCount > 0 && <span className="badge-count">{bookmarksCount}</span>}
           </button>
 
-          <button type="button" className="btn-publish" onClick={onOpenCreateModal}>
-            <span>+ Publicar Noticia</span>
-          </button>
+          {/* Estos controles SOLO aparecen cuando has iniciado sesión como Administrador */}
+          {isAdmin && (
+            <>
+              <button
+                type="button"
+                className="action-btn seo-preview-btn"
+                onClick={onOpenSeoModal}
+                title="Herramienta SEO para el Administrador"
+              >
+                <span>🔍 SEO Google</span>
+              </button>
+
+              <button type="button" className="btn-publish" onClick={onOpenCreateModal}>
+                <span>+ Publicar Noticia</span>
+              </button>
+
+              <button
+                type="button"
+                className="action-btn admin-logout-btn"
+                onClick={onLogoutAdmin}
+                title="Salir del modo Administrador y ver como cliente"
+              >
+                <span>🔓 Salir Admin</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

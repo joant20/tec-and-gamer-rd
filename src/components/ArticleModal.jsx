@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { newsService, isValidAdminPin } from '../services/newsService';
+import { newsService } from '../services/newsService';
 
 export default function ArticleModal({
   article,
@@ -7,6 +7,7 @@ export default function ArticleModal({
   isBookmarked,
   onToggleBookmark,
   onSelectTag,
+  isAdmin,
   onEditArticle,
   onDeleteArticle,
 }) {
@@ -15,15 +16,11 @@ export default function ArticleModal({
   const [commentText, setCommentText] = useState('');
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deletePin, setDeletePin] = useState('');
-  const [deleteError, setDeleteError] = useState('');
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (article) {
       setShowDeleteConfirm(false);
-      setDeletePin('');
-      setDeleteError('');
       setComments(newsService.getComments(article.id));
       newsService.fetchComments(article.id).then((list) => {
         if (Array.isArray(list)) setComments(list);
@@ -54,12 +51,7 @@ export default function ArticleModal({
     setTimeout(() => setCopied(false), 2800);
   };
 
-  const handleConfirmDelete = async (e) => {
-    e.preventDefault();
-    if (!isValidAdminPin(deletePin)) {
-      setDeleteError('⚠️ Clave de Administrador incorrecta.');
-      return;
-    }
+  const handleConfirmDelete = async () => {
     setDeleting(true);
     await onDeleteArticle?.(article.id);
     setDeleting(false);
@@ -121,44 +113,42 @@ export default function ArticleModal({
               <button type="button" className="modal-action-btn" onClick={handleCopyShare}>
                 {copied ? '✓ Link directo copiado' : '🔗 Compartir Noticia'}
               </button>
-              <button
-                type="button"
-                className="modal-action-btn"
-                onClick={() => onEditArticle?.(article)}
-                title="Editar noticia (Requiere clave de Admin)"
-              >
-                ✏️ Editar
-              </button>
-              <button
-                type="button"
-                className="modal-action-btn delete-btn"
-                onClick={() => setShowDeleteConfirm((prev) => !prev)}
-                title="Eliminar noticia (Requiere clave de Admin)"
-              >
-                🗑️ Borrar
-              </button>
+
+              {/* Editar y Borrar SOLO son visibles para el Administrador */}
+              {isAdmin && (
+                <>
+                  <button
+                    type="button"
+                    className="modal-action-btn"
+                    onClick={() => onEditArticle?.(article)}
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    type="button"
+                    className="modal-action-btn delete-btn"
+                    onClick={() => setShowDeleteConfirm((prev) => !prev)}
+                  >
+                    🗑️ Borrar
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          {showDeleteConfirm && (
-            <form className="delete-confirm-box" onSubmit={handleConfirmDelete}>
+          {isAdmin && showDeleteConfirm && (
+            <div className="delete-confirm-box">
               <div className="delete-confirm-header">
-                <strong>🔐 Eliminar esta noticia de la base de datos:</strong>
-                <span>Ingresa tu clave de Administrador para confirmar</span>
+                <strong>🗑️ ¿Seguro que deseas eliminar esta noticia permanentemente?</strong>
               </div>
               <div className="delete-confirm-controls">
-                <input
-                  type="password"
-                  required
-                  placeholder="Tu clave de Admin..."
-                  value={deletePin}
-                  onChange={(e) => {
-                    setDeletePin(e.target.value);
-                    setDeleteError('');
-                  }}
-                />
-                <button type="submit" className="btn-confirm-delete" disabled={deleting}>
-                  {deleting ? 'Eliminando...' : 'Confirmar Eliminación'}
+                <button
+                  type="button"
+                  className="btn-confirm-delete"
+                  disabled={deleting}
+                  onClick={handleConfirmDelete}
+                >
+                  {deleting ? 'Eliminando...' : 'Sí, eliminar noticia'}
                 </button>
                 <button
                   type="button"
@@ -168,8 +158,7 @@ export default function ArticleModal({
                   Cancelar
                 </button>
               </div>
-              {deleteError && <div className="delete-error-msg">{deleteError}</div>}
-            </form>
+            </div>
           )}
 
           <div className="modal-article-content">

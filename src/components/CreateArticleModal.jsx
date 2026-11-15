@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { CATEGORIES } from '../data/articles';
-import { isValidAdminPin } from '../services/newsService';
 
 const PRESET_IMAGES = [
   {
@@ -37,8 +36,6 @@ export default function CreateArticleModal({
   const [tags, setTags] = useState('');
   const [content, setContent] = useState('');
   const [featured, setFeatured] = useState(false);
-  const [adminPin, setAdminPin] = useState('');
-  const [pinError, setPinError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -67,7 +64,6 @@ export default function CreateArticleModal({
       setContent('');
       setFeatured(false);
     }
-    setPinError('');
   }, [editingArticle, isOpen]);
 
   if (!isOpen) return null;
@@ -76,13 +72,8 @@ export default function CreateArticleModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isValidAdminPin(adminPin)) {
-      setPinError('⚠️ PIN de Administrador incorrecto. Usa tu clave de editor para guardar.');
-      return;
-    }
     if (!title.trim() || !excerpt.trim() || !content.trim()) return;
 
-    setPinError('');
     setSubmitting(true);
 
     const payload = {
@@ -127,32 +118,13 @@ export default function CreateArticleModal({
             </h2>
           </div>
           <p className="create-modal-subtitle">
-            ☁️ <strong>Conectado a tu Base de Datos en la Nube (Supabase):</strong>{' '}
+            ☁️ <strong>Panel exclusivo de Administrador (Supabase):</strong>{' '}
             {isEditMode
               ? 'Los cambios se actualizarán al instante para todos los lectores.'
               : 'Las noticias que publiques aquí aparecerán al instante para todos los visitantes en internet.'}
           </p>
 
           <form onSubmit={handleSubmit} className="create-article-form">
-            <div className="form-group">
-              <label>🔐 Clave de Administrador (Solo para ti) *</label>
-              <input
-                type="password"
-                required
-                placeholder="Ingresa tu PIN de administrador..."
-                value={adminPin}
-                onChange={(e) => {
-                  setAdminPin(e.target.value);
-                  setPinError('');
-                }}
-              />
-              {pinError && (
-                <span style={{ color: '#fda4af', fontSize: '0.8rem', fontWeight: 600 }}>
-                  {pinError}
-                </span>
-              )}
-            </div>
-
             <div className="form-group">
               <label>Título de la noticia *</label>
               <input

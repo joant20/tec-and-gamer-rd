@@ -10,7 +10,10 @@ import DominicanHubs from './components/DominicanHubs';
 import ArticleModal from './components/ArticleModal';
 import CreateArticleModal from './components/CreateArticleModal';
 import SeoPreviewModal from './components/SeoPreviewModal';
+import AdminLoginModal from './components/AdminLoginModal';
 import Footer from './components/Footer';
+
+const ADMIN_SESSION_KEY = 'tecgamer_rd_admin_session_v1';
 
 export default function App() {
   const [articles, setArticles] = useState(() => newsService.getArticles());
@@ -23,6 +26,35 @@ export default function App() {
   const [editingArticle, setEditingArticle] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSeoModalOpen, setIsSeoModalOpen] = useState(false);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    try {
+      return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleLoginAdmin = () => {
+    setIsAdmin(true);
+    try {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleLogoutAdmin = () => {
+    setIsAdmin(false);
+    setIsCreateModalOpen(false);
+    setIsSeoModalOpen(false);
+    setEditingArticle(null);
+    try {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    } catch {
+      // ignore
+    }
+  };
 
   const handleOpenArticle = (article) => {
     setActiveArticle(article);
@@ -40,6 +72,9 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const initialArticleId = params.get('noticia');
+    if (params.has('admin')) {
+      setIsAdminLoginOpen(true);
+    }
 
     newsService.fetchCloudArticles().then((res) => {
       const loaded = res?.articles?.length > 0 ? res.articles : newsService.getArticles();
@@ -150,11 +185,13 @@ export default function App() {
         showBookmarksOnly={showBookmarksOnly}
         onToggleBookmarksOnly={() => setShowBookmarksOnly((prev) => !prev)}
         bookmarksCount={bookmarks.length}
+        isAdmin={isAdmin}
         onOpenCreateModal={() => {
           setEditingArticle(null);
           setIsCreateModalOpen(true);
         }}
         onOpenSeoModal={() => setIsSeoModalOpen(true)}
+        onLogoutAdmin={handleLogoutAdmin}
       />
 
       <main className="main-content">
@@ -218,7 +255,7 @@ export default function App() {
                 <div className="empty-icon">🇩🇴</div>
                 <h3>No encontramos noticias con esos filtros</h3>
                 <p>
-                  Prueba buscando otro término (ej. IA, ITLA, MenaRD, INTEC) o limpia los filtros activos.
+                  Prueba buscando otro término (ej. GTA VI, IA, ITLA, MenaRD, INTEC) o limpia los filtros activos.
                 </p>
                 <button type="button" className="btn-publish" onClick={resetAllFilters}>
                   Ver todas las noticias
@@ -269,6 +306,9 @@ export default function App() {
           setSelectedCategory('Todas');
           setSearchQuery(tag);
         }}
+        isAdmin={isAdmin}
+        onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
+        onLogoutAdmin={handleLogoutAdmin}
       />
 
       <ArticleModal
@@ -280,6 +320,7 @@ export default function App() {
           setSearchQuery(tag);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        isAdmin={isAdmin}
         onEditArticle={(art) => {
           setEditingArticle(art);
           setIsCreateModalOpen(true);
@@ -287,21 +328,31 @@ export default function App() {
         onDeleteArticle={handleDeleteArticle}
       />
 
-      <CreateArticleModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          setEditingArticle(null);
-        }}
-        onCreate={handleCreateArticle}
-        onUpdate={handleUpdateArticle}
-        editingArticle={editingArticle}
-      />
+      {isAdmin && (
+        <>
+          <CreateArticleModal
+            isOpen={isCreateModalOpen}
+            onClose={() => {
+              setIsCreateModalOpen(false);
+              setEditingArticle(null);
+            }}
+            onCreate={handleCreateArticle}
+            onUpdate={handleUpdateArticle}
+            editingArticle={editingArticle}
+          />
 
-      <SeoPreviewModal
-        isOpen={isSeoModalOpen}
-        onClose={() => setIsSeoModalOpen(false)}
-        articles={articles}
+          <SeoPreviewModal
+            isOpen={isSeoModalOpen}
+            onClose={() => setIsSeoModalOpen(false)}
+            articles={articles}
+          />
+        </>
+      )}
+
+      <AdminLoginModal
+        isOpen={isAdminLoginOpen}
+        onClose={() => setIsAdminLoginOpen(false)}
+        onLoginSuccess={handleLoginAdmin}
       />
     </div>
   );

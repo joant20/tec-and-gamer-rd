@@ -2158,3 +2158,34 @@ body {
   font-weight: 600;
   margin-top: 0.5rem;
 }
+
+/* ==========================================
+   DISCREET ADMIN LOGIN & LOGOUT CONTROLS
+   ========================================== */
+.footer-admin-trigger {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.footer-admin-trigger:hover {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.footer-admin-trigger.active {
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.admin-logout-btn:hover {
+  border-color: #f43f5e;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.1);
+}

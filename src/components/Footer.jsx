@@ -1,7 +1,13 @@
 import React from 'react';
 import { PLATFORMS } from '../data/articles';
 
-export default function Footer({ onSelectPlatform, onFilterByTag }) {
+export default function Footer({
+  onSelectPlatform,
+  onFilterByTag,
+  isAdmin,
+  onOpenAdminLogin,
+  onLogoutAdmin,
+}) {
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
@@ -61,9 +67,9 @@ export default function Footer({ onSelectPlatform, onFilterByTag }) {
         </div>
 
         <div className="footer-col">
-          <h4>Talento &amp; eSports RD</h4>
+          <h4>Talento &amp; Tendencias</h4>
           <ul>
-            {['MenaRD', 'Blink Respawn', 'eSports RD', 'Inteligencia Artificial'].map((item) => (
+            {['GTA VI', 'MenaRD', 'Blink Respawn', 'Inteligencia Artificial'].map((item) => (
               <li key={item}>
                 <button
                   type="button"
@@ -82,8 +88,25 @@ export default function Footer({ onSelectPlatform, onFilterByTag }) {
       </div>
 
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} Tec&amp;gamer RD 🇩🇴. Hecho en República Dominicana.</span>
-        <span className="footer-tech-badge">React + Vite • Listo para Producción</span>
+        <span>© {new Date().getFullYear()} Tec&amp;gamer RD 🇩🇴. Todos los derechos reservados.</span>
+        {isAdmin ? (
+          <button
+            type="button"
+            className="footer-admin-trigger active"
+            onClick={onLogoutAdmin}
+          >
+            🔓 Modo Administrador Activo (Cerrar sesión)
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="footer-admin-trigger"
+            onClick={onOpenAdminLogin}
+            title="Acceso exclusivo para el Administrador"
+          >
+            🔒 Acceso Admin
+          </button>
+        )}
       </div>
     </footer>
   );
